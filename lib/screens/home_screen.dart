@@ -9,7 +9,14 @@ import 'dart:io';
 import 'settings_page.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool isDarkMode;
+  final Function(bool) onThemeChanged;
+
+  const HomeScreen({
+    Key? key,
+    this.isDarkMode = false,
+    required this.onThemeChanged,
+  }) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _content = "\ud83d\udcc4 Waiting for shared content...";
   bool _isLoading = false;
 
-  bool _isDarkMode = false;
+  // Removed local _isDarkMode state to use widget.isDarkMode directly
   double _ttsSpeed = 1.0;
   String _ttsVoice = 'Default';
   String _ttsQuality = 'Medium';
@@ -88,10 +95,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onThemeChanged(bool value) {
-    setState(() {
-      _isDarkMode = value;
-    });
-    // TODO: Apply theme change globally
+    // Notify parent widget to update theme
+    widget.onThemeChanged(value);
   }
 
   void _onTtsSpeedChanged(double value) {
@@ -138,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => SettingsPage(
-                    isDarkMode: _isDarkMode,
+                    isDarkMode: widget.isDarkMode,
                     ttsSpeed: _ttsSpeed,
                     ttsVoice: _ttsVoice,
                     ttsQuality: _ttsQuality,
