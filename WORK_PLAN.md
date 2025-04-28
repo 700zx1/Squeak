@@ -25,13 +25,18 @@
 ---
 
 ## Implementation Steps
-1. Integrate a file picker into the Home Screen UI.
-2. Connect file selection to `ParsingService` for content extraction.
-3. Display parsed content in the main view.
-4. Enable TTS for all displayed content.
-5. Improve error handling and user feedback.
-6. Polish UI and add extra features as needed.
+#1. Integrate a file picker into the Home Screen UI.
+#2. Connect file selection to `ParsingService` for content extraction.
+#3. Display parsed content in the main view.
+#4. Enable TTS for all displayed content.
+#5. Improve error handling and user feedback.
+#6. Polish UI and add extra features as needed.
 
+## Implemenation Steps continued.
+1. previous steps 1-6 complete.  Now, build out settings page with needed settings including: TTS voices, quality, speed, other useful options.  Light dark mode toggle.
+2. add TTS text highlighting to the main screen as text is read aloud.
+3. change all references in code of "squeak_new" to "squeak" and adapt as needed to output a working code state.  Please consider the app to be named, "Squeak" officially.
+4. update readme.md to current state.  Create new logo.  Build out how to install apk from releases page on GitHub.  Update features and usage section.  Be sure to note what languages and file types are supported.
 ---
 
-_Last updated: 2025-04-26_
+_Last updated: 2025-04-27

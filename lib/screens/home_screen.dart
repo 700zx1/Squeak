@@ -3,7 +3,10 @@ import '../services/sharing_service.dart';
 import '../services/tts_service.dart';
 import '../services/parsing_service.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'dart:io';
+
+import 'settings_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,6 +18,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _content = "\ud83d\udcc4 Waiting for shared content...";
   bool _isLoading = false;
+
+  bool _isDarkMode = false;
+  double _ttsSpeed = 1.0;
+  String _ttsVoice = 'Default';
+  String _ttsQuality = 'Medium';
 
   Future<void> _pickAndParseFile() async {
     setState(() {
@@ -79,6 +87,34 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _onThemeChanged(bool value) {
+    setState(() {
+      _isDarkMode = value;
+    });
+    // TODO: Apply theme change globally
+  }
+
+  void _onTtsSpeedChanged(double value) {
+    setState(() {
+      _ttsSpeed = value;
+    });
+    // TODO: Apply TTS speed change in TTSService
+  }
+
+  void _onTtsVoiceChanged(String value) {
+    setState(() {
+      _ttsVoice = value;
+    });
+    // TODO: Apply TTS voice change in TTSService
+  }
+
+  void _onTtsQualityChanged(String value) {
+    setState(() {
+      _ttsQuality = value;
+    });
+    // TODO: Apply TTS quality change in TTSService
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,11 +132,26 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            tooltip: 'Settings (Coming Soon)',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings feature coming soon!')),
+            tooltip: 'Settings',
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsPage(
+                    isDarkMode: _isDarkMode,
+                    ttsSpeed: _ttsSpeed,
+                    ttsVoice: _ttsVoice,
+                    ttsQuality: _ttsQuality,
+                    onThemeChanged: _onThemeChanged,
+                    onTtsSpeedChanged: _onTtsSpeedChanged,
+                    onTtsVoiceChanged: _onTtsVoiceChanged,
+                    onTtsQualityChanged: _onTtsQualityChanged,
+                  ),
+                ),
               );
+              if (result != null) {
+                // Handle any returned data from settings page if needed
+              }
             },
           ),
         ],
