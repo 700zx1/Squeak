@@ -113,32 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    SharingService.init((sharedData) async {
-      setState(() {
-        _isLoading = true;
-      });
-      try {
-        if (sharedData.startsWith('http://') || sharedData.startsWith('https://')) {
-          final webpageContent = await fetchWebpageContent(sharedData);
-          final readableContent = extractTextFromHtml(webpageContent);
-          setState(() {
-            _content = readableContent;
-          });
-        } else {
-          setState(() {
-            _content = sharedData.isNotEmpty ? sharedData : 'No content received.';
-          });
-        }
-      } catch (e) {
-        setState(() {
-          _content = 'Failed to process shared content: $e';
-        });
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    });
+    SharingService sharingService = SharingService();
+    sharingService.initialize(); // Removed the extra argument
   }
 
   void _onThemeChanged(bool value) {
@@ -210,50 +186,12 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Center(
         child: _isLoading
             ? const CircularProgressIndicator()
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.folder_open),
-                        label: const Text('Pick a file'),
-                        onPressed: _pickAndParseFile,
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.play_arrow),
-                        label: const Text('Play'),
-                        onPressed: () => TTSService.speak(_content),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.pause),
-                        label: const Text('Pause'),
-                        onPressed: () => TTSService.pause(),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.stop),
-                        label: const Text('Stop'),
-                        onPressed: () => TTSService.stop(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: SingleChildScrollView(
-                        child: Text(
-                          _content,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  _content,
+                  style: const TextStyle(fontSize: 16),
+                ),
               ),
       ),
     );

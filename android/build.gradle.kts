@@ -9,7 +9,7 @@ allprojects {
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "11" // Ensure compatibility with Kotlin and dependencies
     }
 }
 
