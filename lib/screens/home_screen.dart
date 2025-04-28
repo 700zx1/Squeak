@@ -3,6 +3,7 @@ import '../services/sharing_service.dart';
 import '../services/tts_service.dart';
 import '../services/parsing_service.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart'; // Add this import for compute
 import 'package:http/http.dart' as http;
@@ -70,6 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
   String _ttsVoice = 'Default';
   String _ttsEngine = 'Default';
 
+  late final SharingService _sharingService;
+  StreamSubscription<String>? _sharedTextSub;
+
   Future<void> _pickAndParseFile() async {
     setState(() {
       _isLoading = true;
@@ -113,8 +117,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    SharingService sharingService = SharingService();
-    sharingService.initialize(); // Removed the extra argument
+    _sharingService = SharingService();
+    _sharingService.initialize();
+    _sharedTextSub = _sharingService.sharedTextStream.listen((url) async {
+      setState(() {
+        _isLoading = true;
+        _content = 'Fetching shared webpage...';
+      });
+      String html = await fetchWebpageContent(url);
+      String text = extractTextFromHtml(html);
+      setState(() {
+        _content = text.isNotEmpty ? text : 'No readable content found.';
+        _isLoading = false;
+      });
+      if (text.isNotEmpty) {
+        TTSService.speak(text);
+      }
+    });
   }
 
   void _onThemeChanged(bool value) {
@@ -140,6 +159,12 @@ class _HomeScreenState extends State<HomeScreen> {
       _ttsEngine = value;
     });
     TTSService.setEngine(value);
+  }
+
+  @override
+  void dispose() {
+    _sharedTextSub?.cancel();
+    super.dispose();
   }
 
   @override
