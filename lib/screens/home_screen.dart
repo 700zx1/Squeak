@@ -3,7 +3,6 @@ import '../services/sharing_service.dart';
 import '../services/tts_service.dart';
 import '../services/parsing_service.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'settings_page.dart';
@@ -26,10 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String _content = "\ud83d\udcc4 Waiting for shared content...";
   bool _isLoading = false;
 
-  // Removed local _isDarkMode state to use widget.isDarkMode directly
   double _ttsSpeed = 1.0;
   String _ttsVoice = 'Default';
-  String _ttsQuality = 'Medium';
 
   Future<void> _pickAndParseFile() async {
     setState(() {
@@ -95,7 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onThemeChanged(bool value) {
-    // Notify parent widget to update theme
     widget.onThemeChanged(value);
   }
 
@@ -103,21 +99,14 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _ttsSpeed = value;
     });
-    // TODO: Apply TTS speed change in TTSService
+    TTSService.setSpeed(value);
   }
 
   void _onTtsVoiceChanged(String value) {
     setState(() {
       _ttsVoice = value;
     });
-    // TODO: Apply TTS voice change in TTSService
-  }
-
-  void _onTtsQualityChanged(String value) {
-    setState(() {
-      _ttsQuality = value;
-    });
-    // TODO: Apply TTS quality change in TTSService
+    TTSService.setVoice(value);
   }
 
   @override
@@ -146,11 +135,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     isDarkMode: widget.isDarkMode,
                     ttsSpeed: _ttsSpeed,
                     ttsVoice: _ttsVoice,
-                    ttsQuality: _ttsQuality,
                     onThemeChanged: _onThemeChanged,
                     onTtsSpeedChanged: _onTtsSpeedChanged,
                     onTtsVoiceChanged: _onTtsVoiceChanged,
-                    onTtsQualityChanged: _onTtsQualityChanged,
                   ),
                 ),
               );

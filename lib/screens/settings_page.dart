@@ -7,8 +7,6 @@ class SettingsPage extends StatefulWidget {
   final Function(double) onTtsSpeedChanged;
   final String ttsVoice;
   final Function(String) onTtsVoiceChanged;
-  final String ttsQuality;
-  final Function(String) onTtsQualityChanged;
 
   const SettingsPage({
     Key? key,
@@ -18,8 +16,6 @@ class SettingsPage extends StatefulWidget {
     required this.onTtsSpeedChanged,
     required this.ttsVoice,
     required this.onTtsVoiceChanged,
-    required this.ttsQuality,
-    required this.onTtsQualityChanged,
   }) : super(key: key);
 
   @override
@@ -30,10 +26,8 @@ class _SettingsPageState extends State<SettingsPage> {
   late bool _isDarkMode;
   late double _ttsSpeed;
   late String _ttsVoice;
-  late String _ttsQuality;
 
   final List<String> _voices = ['Default', 'Voice 1', 'Voice 2', 'Voice 3'];
-  final List<String> _qualities = ['Low', 'Medium', 'High'];
 
   @override
   void initState() {
@@ -41,7 +35,6 @@ class _SettingsPageState extends State<SettingsPage> {
     _isDarkMode = widget.isDarkMode;
     _ttsSpeed = widget.ttsSpeed;
     _ttsVoice = widget.ttsVoice;
-    _ttsQuality = widget.ttsQuality;
   }
 
   @override
@@ -97,28 +90,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   _ttsVoice = value;
                 });
                 widget.onTtsVoiceChanged(value);
-              }
-            },
-          ),
-          const SizedBox(height: 20),
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(
-              labelText: 'TTS Quality',
-              border: OutlineInputBorder(),
-            ),
-            value: _ttsQuality,
-            items: _qualities
-                .map((quality) => DropdownMenuItem(
-                      value: quality,
-                      child: Text(quality),
-                    ))
-                .toList(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _ttsQuality = value;
-                });
-                widget.onTtsQualityChanged(value);
               }
             },
           ),
