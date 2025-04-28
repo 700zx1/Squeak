@@ -5,6 +5,8 @@ import '../services/parsing_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart'; // Add this import for compute
+import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as html_parser;
 
 import 'settings_page.dart';
 
@@ -24,6 +26,26 @@ Future<String> parseFileInBackground(Map<String, dynamic> args) async {
   } else {
     return 'Unsupported file type.';
   }
+}
+
+// Fetch webpage content
+Future<String> fetchWebpageContent(String url) async {
+  try {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return response.body; // Return raw HTML content
+    } else {
+      return 'Failed to fetch webpage content. Status code: ${response.statusCode}';
+    }
+  } catch (e) {
+    return 'Error fetching webpage content: $e';
+  }
+}
+
+// Extract readable text from HTML
+String extractTextFromHtml(String htmlContent) {
+  final document = html_parser.parse(htmlContent);
+  return document.body?.text ?? 'No readable content found.';
 }
 
 class HomeScreen extends StatefulWidget {
@@ -95,12 +117,27 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isLoading = true;
       });
-      await Future.delayed(const Duration(milliseconds: 500));
-      setState(() {
-        _content = sharedData;
-        _isLoading = false;
-      });
-      TTSService.speak(sharedData);
+      try {
+        if (sharedData.startsWith('http://') || sharedData.startsWith('https://')) {
+          final webpageContent = await fetchWebpageContent(sharedData);
+          final readableContent = extractTextFromHtml(webpageContent);
+          setState(() {
+            _content = readableContent;
+          });
+        } else {
+          setState(() {
+            _content = sharedData.isNotEmpty ? sharedData : 'No content received.';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _content = 'Failed to process shared content: $e';
+        });
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     });
   }
 
@@ -208,7 +245,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: SingleChildScrollView(child: Text(_content)),
+                      child: SingleChildScrollView(
+                        child: Text(
+                          _content,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
                     ),
                   ),
                 ],
