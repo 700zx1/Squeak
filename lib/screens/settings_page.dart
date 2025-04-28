@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/tts_service.dart';
 
 class SettingsPage extends StatefulWidget {
   final Function(bool) onThemeChanged;
@@ -7,6 +8,8 @@ class SettingsPage extends StatefulWidget {
   final Function(double) onTtsSpeedChanged;
   final String ttsVoice;
   final Function(String) onTtsVoiceChanged;
+  final String ttsEngine;
+  final Function(String) onTtsEngineChanged;
 
   const SettingsPage({
     Key? key,
@@ -16,6 +19,8 @@ class SettingsPage extends StatefulWidget {
     required this.onTtsSpeedChanged,
     required this.ttsVoice,
     required this.onTtsVoiceChanged,
+    required this.ttsEngine,
+    required this.onTtsEngineChanged,
   }) : super(key: key);
 
   @override
@@ -26,8 +31,10 @@ class _SettingsPageState extends State<SettingsPage> {
   late bool _isDarkMode;
   late double _ttsSpeed;
   late String _ttsVoice;
+  late String _ttsEngine;
 
   final List<String> _voices = ['Default', 'Voice 1', 'Voice 2', 'Voice 3'];
+  List<String> _engines = ['Default']; // Placeholder for TTS engines
 
   @override
   void initState() {
@@ -35,6 +42,21 @@ class _SettingsPageState extends State<SettingsPage> {
     _isDarkMode = widget.isDarkMode;
     _ttsSpeed = widget.ttsSpeed;
     _ttsVoice = widget.ttsVoice;
+    _ttsEngine = widget.ttsEngine;
+
+    // Fetch available TTS engines
+    _fetchEngines();
+  }
+
+  Future<void> _fetchEngines() async {
+    try {
+      final engines = await TTSService.getAvailableEngines();
+      setState(() {
+        _engines = ['Default', ...engines.cast<String>()]; // Ensure 'Default' is included
+      });
+    } catch (e) {
+      print('Error fetching TTS engines: $e');
+    }
   }
 
   @override
@@ -90,6 +112,28 @@ class _SettingsPageState extends State<SettingsPage> {
                   _ttsVoice = value;
                 });
                 widget.onTtsVoiceChanged(value);
+              }
+            },
+          ),
+          const SizedBox(height: 20),
+          DropdownButtonFormField<String>(
+            decoration: const InputDecoration(
+              labelText: 'TTS Engine',
+              border: OutlineInputBorder(),
+            ),
+            value: _ttsEngine,
+            items: _engines
+                .map((engine) => DropdownMenuItem(
+                      value: engine,
+                      child: Text(engine),
+                    ))
+                .toList(),
+            onChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  _ttsEngine = value;
+                });
+                widget.onTtsEngineChanged(value);
               }
             },
           ),

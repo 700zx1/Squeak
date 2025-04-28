@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double _ttsSpeed = 1.0;
   String _ttsVoice = 'Default';
+  String _ttsEngine = 'Default';
 
   Future<void> _pickAndParseFile() async {
     setState(() {
@@ -109,6 +110,13 @@ class _HomeScreenState extends State<HomeScreen> {
     TTSService.setVoice(value);
   }
 
+  void _onTtsEngineChanged(String value) {
+    setState(() {
+      _ttsEngine = value;
+    });
+    TTSService.setEngine(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,9 +143,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     isDarkMode: widget.isDarkMode,
                     ttsSpeed: _ttsSpeed,
                     ttsVoice: _ttsVoice,
+                    ttsEngine: _ttsEngine, // Pass the ttsEngine here
                     onThemeChanged: _onThemeChanged,
                     onTtsSpeedChanged: _onTtsSpeedChanged,
                     onTtsVoiceChanged: _onTtsVoiceChanged,
+                    onTtsEngineChanged: _onTtsEngineChanged,
                   ),
                 ),
               );
