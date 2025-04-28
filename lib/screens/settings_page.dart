@@ -32,6 +32,7 @@ class _SettingsPageState extends State<SettingsPage> {
   late double _ttsSpeed;
   late String _ttsVoice;
   late String _ttsEngine;
+  bool _isLoading = false;
 
   final List<String> _voices = ['Default', 'Voice 1', 'Voice 2', 'Voice 3'];
   List<String> _engines = ['Default']; // Placeholder for TTS engines
@@ -49,6 +50,9 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _fetchEngines() async {
+    setState(() {
+      _isLoading = true; // Add a loading state if necessary
+    });
     try {
       final engines = await TTSService.getAvailableEngines();
       setState(() {
@@ -56,6 +60,10 @@ class _SettingsPageState extends State<SettingsPage> {
       });
     } catch (e) {
       print('Error fetching TTS engines: $e');
+    } finally {
+      setState(() {
+        _isLoading = false; // Reset loading state
+      });
     }
   }
 

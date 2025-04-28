@@ -4,8 +4,27 @@ import '../services/tts_service.dart';
 import '../services/parsing_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart'; // Add this import for compute
 
 import 'settings_page.dart';
+
+// Add this helper function outside the class
+Future<String> parseFileInBackground(Map<String, dynamic> args) async {
+  final File file = args['file'];
+  final String ext = args['ext'];
+
+  if (ext == 'pdf') {
+    return await ParsingService.parsePDF(file);
+  } else if (ext == 'epub') {
+    return await ParsingService.parseEPUB(file);
+  } else if (ext == 'html') {
+    return await ParsingService.parseHTML(await file.readAsString());
+  } else if (ext == 'txt') {
+    return await ParsingService.parsePlainText(await file.readAsString());
+  } else {
+    return 'Unsupported file type.';
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -41,21 +60,14 @@ class _HomeScreenState extends State<HomeScreen> {
       if (result != null && result.files.single.path != null) {
         final file = File(result.files.single.path!);
         final ext = file.path.split('.').last.toLowerCase();
-        String parsed = '';
-        if (ext == 'pdf') {
-          parsed = await ParsingService.parsePDF(file);
-        } else if (ext == 'epub') {
-          parsed = await ParsingService.parseEPUB(file);
-        } else if (ext == 'html') {
-          parsed = await ParsingService.parseHTML(await file.readAsString());
-        } else if (ext == 'txt') {
-          parsed = await ParsingService.parsePlainText(await file.readAsString());
-        } else {
-          parsed = 'Unsupported file type.';
-        }
+
+        // Use compute to parse the file in a background thread
+        final parsed = await compute(parseFileInBackground, {'file': file, 'ext': ext});
+
         setState(() {
           _content = parsed.isNotEmpty ? parsed : 'No readable content found.';
         });
+
         if (parsed.isNotEmpty) {
           TTSService.speak(parsed);
         }
