@@ -260,43 +260,46 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.folder_open),
-                        label: const Text('Pick a file'),
-                        onPressed: _pickAndParseFile,
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.play_arrow),
-                        label: const Text('Play'),
-                        onPressed: (_content.isNotEmpty && !_isLoading)
-                            ? () {
-                                print('Play button pressed. Content:');
-                                print(_content);
-                                TTSService.speak(_content);
-                              }
-                            : null,
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.pause),
-                        label: const Text('Pause'),
-                        onPressed: () {
-                          TTSService.pause();
-                        },
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.stop),
-                        label: const Text('Stop'),
-                        onPressed: () {
-                          TTSService.stop();
-                        },
-                      ),
-                    ],
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.folder_open),
+                          label: const Text('Pick a file'),
+                          onPressed: _pickAndParseFile,
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Play'),
+                          onPressed: (_content.isNotEmpty && !_isLoading)
+                              ? () {
+                                  print('Play button pressed. Content:');
+                                  print(_content);
+                                  TTSService.speak(_content);
+                                }
+                              : null,
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.pause),
+                          label: const Text('Pause'),
+                          onPressed: () {
+                            TTSService.pause();
+                          },
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.stop),
+                          label: const Text('Stop'),
+                          onPressed: () {
+                            TTSService.stop();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 12),
                 ],

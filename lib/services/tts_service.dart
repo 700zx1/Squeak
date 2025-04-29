@@ -2,11 +2,28 @@ import 'package:flutter_tts/flutter_tts.dart';
 
 class TTSService {
   static final FlutterTts _flutterTts = FlutterTts();
+  static bool _listenersInitialized = false;
 
   static Future<void> speak(String text) async {
+    if (!_listenersInitialized) {
+      _flutterTts.setStartHandler(() {
+        print('TTS: Speech started');
+      });
+      _flutterTts.setCompletionHandler(() {
+        print('TTS: Speech completed');
+      });
+      _flutterTts.setErrorHandler((msg) {
+        print('TTS: Error: ' + msg);
+      });
+      _listenersInitialized = true;
+    }
     await _flutterTts.setLanguage("en-US");
     await _flutterTts.setSpeechRate(_speechRate);
-    await _flutterTts.speak(text);
+    // Limit text length for TTS debug
+    final limitedText = text.length > 500 ? text.substring(0, 500) : text;
+    print('TTS: Speaking text (length: \\${limitedText.length}):');
+    print(limitedText);
+    await _flutterTts.speak(limitedText);
   }
 
   static double _speechRate = 0.5;
