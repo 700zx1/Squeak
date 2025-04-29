@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart'; // Add this import for compute
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
+import 'package:flutter_html/flutter_html.dart';
 
 import 'settings_page.dart';
 
@@ -46,7 +47,31 @@ Future<String> fetchWebpageContent(String url) async {
 // Extract readable text from HTML
 String extractTextFromHtml(String htmlContent) {
   final document = html_parser.parse(htmlContent);
-  return document.body?.text ?? 'No readable content found.';
+
+  // Wikipedia: main content in <div id="mw-content-text">
+  final mainDiv = document.querySelector('#mw-content-text');
+  if (mainDiv != null) {
+    final text = mainDiv.text.trim();
+    if (text.isNotEmpty) return text;
+  }
+
+  // Fallback: <article>
+  final article = document.querySelector('article');
+  if (article != null) {
+    final text = article.text.trim();
+    if (text.isNotEmpty) return text;
+  }
+
+  // Fallback: <main>
+  final mainTag = document.querySelector('main');
+  if (mainTag != null) {
+    final text = mainTag.text.trim();
+    if (text.isNotEmpty) return text;
+  }
+
+  // Fallback: all body text
+  final bodyText = document.body?.text.trim() ?? '';
+  return bodyText.isNotEmpty ? bodyText : 'No readable content found.';
 }
 
 class HomeScreen extends StatefulWidget {
@@ -65,6 +90,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _content = "\ud83d\udcc4 Waiting for shared content...";
+  String _htmlContent = '';
   bool _isLoading = false;
 
   double _ttsSpeed = 1.0;
@@ -92,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         setState(() {
           _content = parsed.isNotEmpty ? parsed : 'No readable content found.';
+          _htmlContent = ext == 'html' && parsed.isNotEmpty ? file.readAsStringSync() : '';
         });
 
         if (parsed.isNotEmpty) {
@@ -101,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       setState(() {
         _content = 'Failed to parse file: $e';
+        _htmlContent = '';
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -123,15 +151,21 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isLoading = true;
         _content = 'Fetching shared webpage...';
+        _htmlContent = '';
       });
       String html = await fetchWebpageContent(url);
       String text = extractTextFromHtml(html);
       setState(() {
         _content = text.isNotEmpty ? text : 'No readable content found.';
+        _htmlContent = html;
         _isLoading = false;
       });
-      if (text.isNotEmpty) {
-        TTSService.speak(text);
+      if (text.trim().isNotEmpty) {
+        print('Extracted text for TTS:');
+        print(text);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          TTSService.speak(text);
+        });
       }
     });
   }
@@ -217,10 +251,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        _content,
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                      child: _htmlContent.isNotEmpty
+                          ? Html(data: _htmlContent)
+                          : Text(
+                              _content,
+                              style: const TextStyle(fontSize: 16),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -236,11 +272,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       ElevatedButton.icon(
                         icon: const Icon(Icons.play_arrow),
                         label: const Text('Play'),
-                        onPressed: () {
-                          if (_content.isNotEmpty && !_isLoading) {
-                            TTSService.speak(_content);
-                          }
-                        },
+                        onPressed: (_content.isNotEmpty && !_isLoading)
+                            ? () {
+                                print('Play button pressed. Content:');
+                                print(_content);
+                                TTSService.speak(_content);
+                              }
+                            : null,
                       ),
                       const SizedBox(width: 10),
                       ElevatedButton.icon(
