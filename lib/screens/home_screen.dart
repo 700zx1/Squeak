@@ -211,12 +211,57 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Center(
         child: _isLoading
             ? const CircularProgressIndicator()
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  _content,
-                  style: const TextStyle(fontSize: 16),
-                ),
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        _content,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.folder_open),
+                        label: const Text('Pick a file'),
+                        onPressed: _pickAndParseFile,
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Play'),
+                        onPressed: () {
+                          if (_content.isNotEmpty && !_isLoading) {
+                            TTSService.speak(_content);
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.pause),
+                        label: const Text('Pause'),
+                        onPressed: () {
+                          TTSService.pause();
+                        },
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.stop),
+                        label: const Text('Stop'),
+                        onPressed: () {
+                          TTSService.stop();
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ),
       ),
     );
